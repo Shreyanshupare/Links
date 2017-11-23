@@ -1,0 +1,149 @@
+Notes: Don't touch the root .bashrc file
+
+http://chennaihug.org/knowledgebase/spark-master-and-slaves-multi-node-installation/
+https://github.com/mbonaci/mbo-spark
+http://data-flair.training/blogs/install-deploy-run-spark-2-x-multi-node-cluster-step-by-step-guide/
+https://blog.knoldus.com/2015/04/14/setup-a-apache-spark-cluster-in-your-single-standalone-machine/
+
+https://chawlasumit.wordpress.com/2015/03/09/install-a-multi-node-hadoop-cluster-on-ubuntu-14-04/
+https://www.dezyre.com/apache-spark-tutorial/spark-tutorial
+https://www.cloudera.com/documentation/enterprise/5-5-x/topics/spark_develop_run.html
+
+
+
+How do I copy a folder keeping owners and permissions intact?
+sudo cp -rp /home/my_home /media/backup/my_home
+
+ssh  ipaddress of machine which terminal want to access
+eg: ssh 192.168.1.69 
+
+
+
+
+
+step:1 Install java by following instruction
+	sudo apt-get purge openjdk*
+	sudo apt-add-repository ppa:webupd8team/java
+	sudo apt-get update
+	sudo apt-get install oracle-java8-installer
+
+step:2 check java version by typing following command
+	java -version
+
+use following command pwd to get the path of java
+/usr/lib/jvm/java-8-oracle
+
+
+step:3 set the JAVA_HOME by typing => sudo nano /etc/environment
+	paste below path in it
+ 	JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
+	then type:   source /etc/environment
+
+
+step: 4 ip-v6 disabling 
+	sudo nano /etc/sysctl.conf
+	net.ipv6.conf.all.disable_ipv6 = 1
+	net.ipv6.conf.default.disable_ipv6 = 1
+	net.ipv6.conf.lo.disable_ipv6 = 1
+
+	sudo sysctl -p
+	cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+	if you get output->1 its activated
+
+
+step:5 SSH remote access
+	generating access key
+
+	ssh-keygen -t rsa -P ""
+
+	use ifconfig to get ip address and send key to master and worker do this in both the machine
+	ssh-copy-id -i /home/bizruntime/.ssh/id_rsa.pub bizruntime@192.168.1.72 
+	ssh-copy-id -i /home/bizruntime/.ssh/id_rsa.pub bizruntime@192.168.1.75
+
+	use cat authorized_keys from .ssh folder to check whether keys are added
+
+step: 6 download spark
+	wget http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
+
+	unzip it with this command: tar xzf spark-2.1.0-bin-hadoop2.7.tgz   
+
+	set the SPARK_HOME and bin path in .bashrc file which is located parralle to unzipped file
+
+	SPARK_HOME=/home/bizruntime/spark-2.1.0-bin-hadoop2.7
+	export PATH=$PATH:$SPARK_HOME/bin
+
+	Then type source ~/.bashrc
+
+step:7 copy and paste the slaves.template and spark-env.sh.template in the same folder which will be in  spark-2.1.0-bin-hadoop2.7/conf
+	Run the following command to change name as follows
+
+	sudo cp -rp slaves.template slaves
+	sudo cp -rp spark-env.sh.template spark-env.sh
+
+step:8 now open slaves file and paste master and slaves ip
+	sudo nano slaves (open the slaves file for editing)
+	192.168.1.69
+	192.168.1.72
+	192.168.1.75
+	use this command (cat slaves) to check whether it is updated
+
+step:9 open spark-env.sh and edit as follows
+	export SPARK_MASTER_HOST=192.168.1.69 (master ip)
+
+	export SPARK_WORKER_CORES=2
+
+	export SPARK_WORKER_MEMORY=1g
+
+	export SPARK_WORKER_INSTANCES=2
+
+
+
+==========================================================================
+
+Starting master and slaves
+
+.go to the location in master
+	
+	/home/bizruntime/spark-2.1.0-bin-hadoop2.7/sbin
+
+.type the below command to start all master and slaves
+	./start-all.sh 
+
+To submit a job to master follow the below example
+	spark-submit --master spark://192.168.1.69:7077 examples/src/main/python/pi.py
+
+open the below link to view in browser
+	http://(master ip address):8080/
+eg:	http://192.168.1.69:8080/
+
+==================================
+spark-cluster
+
+192.168.1.69
+192.168.1.72
+192.168.1.75
+
+
+username: bizruntime
+password: bizruntime@123
+
+
+Removing file or folder 
+rm -rf directory_name
+
+To stop the machine
+sudo init 6
+
+
+
+
+
+
+
+
+
+
+
+
+
